@@ -12,6 +12,8 @@ app.post('/webhook', async (req, res) => {
 
     // Check if this is a "push" event
     if (data.commits) {
+        console.log(JSON.stringify(data, null, 2)); // Log the payload for debugging
+
         const repo = data.repository.name;
         const author = data.sender.login;
         const message = data.commits[0].message;
@@ -20,8 +22,8 @@ app.post('/webhook', async (req, res) => {
             username: "Custom Repo Bot",
             embeds: [{
                 title: `Push to ${repo}`,
-                description: `**${author}** says: *"${message}"*`,
-                color: 5814783, // Blurple!
+                description: `**${author}** made a push. \n*"${message}"*`,
+                color: 9581567, 
                 timestamp: new Date()
             }]
         };
