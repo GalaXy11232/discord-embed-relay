@@ -10,25 +10,41 @@ const DISCORD_URL = process.env.DISCORD_WEBHOOK_URL;
 app.post('/webhook', async (req, res) => {
     const data = req.body;
 
-    // Check if this is a "push" event
-    if (data.commits) {
-        console.log(JSON.stringify(data, null, 2)); // Log the payload for debugging
+    if (data.commits && data.commits.length > 0) {
+        const repoName = data.repository.name;
+        const commitFields = data.commits.map(commit => {
 
-        const repo = data.repository.name;
-        const author = data.sender.login;
-        const message = data.commits[0].message;
+            const messageParts = commit.message.split('\n\n');
+            const commitTitle = messageParts[0].trim();
+ 
+            const commitDescription = messageParts.slice(1).join('\n\n').trim() || "_No description provided._";
+            
+            return {
+                name: `${commit.author.name}: ${commitTitle}`,
+                value: commitDescription,
+                inline: false
+            };
+        });
 
         const embed = {
-            username: "Custom Repo Bot",
+            // username: "Custom Repo Bot",
             embeds: [{
-                title: `Push to ${repo}`,
-                description: `**${author}** made a push. \n*"${message}"*`,
+                title: `Pushed to ${repoName}`, 
+                fields: commitFields,
                 color: 9581567, 
-                timestamp: new Date()
+                timestamp: new Date(),
+                footer: {
+                    text: "GitHub Relay Service"
+                }
             }]
         };
 
-        await axios.post(DISCORD_URL, embed);
+        try {
+            await axios.post(DISCORD_URL, embed);
+            console.log(`Successfully sent ${data.commits.length} commits to Discord.`);
+        } catch (error) {
+            console.error("Error sending to Discord:", error.response?.data || error.message);
+        }
     }
     
     res.status(200).send('OK');
