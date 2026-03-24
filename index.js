@@ -20,7 +20,7 @@ app.post('/webhook', async (req, res) => {
             const commitDescription = "- " + (messageParts.slice(1).join('\n\n').trim() || "_No description provided._");
             
             return {
-                name: `"${commitTitle}" (by ${commit.author.name})`,
+                name: `"${commitTitle}" (\`${commit.author.name}\`)`,
                 value: commitDescription,
                 inline: false
             };
